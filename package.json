@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "next dev"
+  },
+  "dependencies": {
+    "@-ft/mode-next": "^0.1.7",
+    "di-typed": "^0.0.5",
+    "next": "^15.4.6"
+  },
+  "devDependencies": {
+    "@types/node": "24.2.0",
+    "@types/react": "19.1.9",
+    "typescript": "5.9.2"
+  }
+}
