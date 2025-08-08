@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { PropsWithChildren } from "react";
 import { Locale } from "../../shared/domain/models/Locale";
 
+import "../global.css";
+
 interface ActualRootLayoutProps extends PropsWithChildren {
   params: Promise<Record<"locale", Locale>>;
 }

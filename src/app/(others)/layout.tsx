@@ -2,6 +2,8 @@ import { ModeContextProvider } from "@-ft/mode-next";
 import { cookies } from "next/headers";
 import { PropsWithChildren } from "react";
 
+import "../global.css";
+
 export default async function ActualRootLayout({
   children,
 }: PropsWithChildren) {
