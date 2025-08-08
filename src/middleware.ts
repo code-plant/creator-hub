@@ -18,7 +18,7 @@ function guessLocaleFromRequest(req: NextRequest) {
 }
 
 export default async function middleware(req: NextRequest) {
-  const pathnameFirstSegment = req.nextUrl.pathname.split("/")[1];
+  const pathnameFirstSegment = req.nextUrl.pathname.split("/")[1].split("?")[0];
   if (
     !localeMap[pathnameFirstSegment] &&
     !allowedPathSegmentsWithoutLocaleSet[pathnameFirstSegment]
