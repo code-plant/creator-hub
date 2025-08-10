@@ -3,6 +3,7 @@ import { localeMap } from "../shared/domain/models/Locale";
 
 const allowedPathSegmentsWithoutLocaleSet: Partial<Record<string, boolean>> = {
   "": true,
+  api: true,
   "mode.js": true,
   "favicon.ico": true,
   _next: true,

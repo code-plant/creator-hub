@@ -8,7 +8,9 @@
   },
   "dependencies": {
     "@-ft/mode-next": "^0.1.7",
-    "di-typed": "^0.0.5",
+    "di-typed": "^0.0.7",
+    "gql-typed": "^0.0.0",
+    "graphql": "^16.11.0",
     "next": "^15.4.6"
   },
   "devDependencies": {
