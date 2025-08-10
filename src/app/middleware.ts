@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { localeMap } from "./shared/domain/models/Locale";
+import { localeMap } from "../shared/domain/models/Locale";
 
 const allowedPathSegmentsWithoutLocaleSet: Partial<Record<string, boolean>> = {
   "": true,
@@ -17,7 +17,9 @@ function guessLocaleFromRequest(req: NextRequest) {
   return "en";
 }
 
-export default async function middleware(req: NextRequest) {
+export default async function middleware(
+  req: NextRequest
+): Promise<NextResponse> {
   const pathnameFirstSegment = req.nextUrl.pathname.split("/")[1].split("?")[0];
   if (
     !localeMap[pathnameFirstSegment] &&
@@ -27,4 +29,6 @@ export default async function middleware(req: NextRequest) {
       new URL(`/${guessLocaleFromRequest(req)}${req.nextUrl.pathname}`, req.url)
     );
   }
+
+  return NextResponse.next();
 }

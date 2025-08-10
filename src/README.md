@@ -14,6 +14,8 @@
 
 `shared` directory is for shared kernel.
 
+`All.ts` contains all the DI tokens.
+
 ## Frontend
 
 `app` directory contains Next.js pages.
