@@ -1,5 +1,5 @@
 import { GraphQLSchema } from "graphql";
-import { Logger } from "./shared/application/services/Logger";
+import { Logger } from "../framework/application/services/Logger";
 
 export interface All {
   logger: Logger;

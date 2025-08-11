@@ -5,12 +5,11 @@ import {
   parse,
   specifiedRules,
   validate,
-  type ExecutionResult,
 } from "graphql";
-import { container } from "../container";
-import { createRequestContext } from "../createRequestContext";
-import { Context } from "./Context";
-import { schema } from "./schema";
+import { container } from "../../../backend/container";
+import { createRequestContext } from "../../../backend/createRequestContext";
+import { Context } from "../../../backend/graphql/Context";
+import { schema } from "../../../backend/graphql/schema";
 
 // export const runtime = "nodejs";
 
@@ -91,7 +90,7 @@ async function handle(req: Request): Promise<Response> {
       requestContext: await createRequestContext(req),
     };
 
-    const result: ExecutionResult = await execute({
+    const result = await execute({
       schema,
       document,
       variableValues: coerceVars(body.variables),

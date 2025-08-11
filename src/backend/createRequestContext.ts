@@ -1,4 +1,4 @@
-import { RequestContext } from "../../types/RequestContext";
+import { RequestContext } from "./types/RequestContext";
 
 export async function createRequestContext(
   req: Request

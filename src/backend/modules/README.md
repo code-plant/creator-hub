@@ -1,6 +1,6 @@
 # Directory Structure for `src/modules`
 
-Each directory is a bounded context.
+Each directory is a bounded context, or shared kernel (`shared`).
 
 Each bound context has directory structure like:
 

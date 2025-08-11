@@ -1,5 +1,5 @@
-import { User } from "../shared/domain/models/User";
-import { UserId } from "../shared/domain/models/UserId";
+import { User } from "../modules/shared/models/User";
+import { UserId } from "../modules/shared/models/UserId";
 
 export type Auth = AnonymousAuth | BeforeTosAuth | AuthenticatedAuth;
 

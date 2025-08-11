@@ -1,7 +1,14 @@
-import { Config, create, objectType, resolver } from "gql-typed";
+import { create, objectType, resolver } from "gql-typed";
+import { Config } from "./Config";
 
 const Query = objectType<Config, {}>()({
   name: "Query",
+  fieldResolvers: {
+    hello: resolver<string>()<Config, {}>()({
+      resolve: () => "world",
+      type: { type: "String" },
+    }),
+  },
 });
 const Mutation = objectType<Config, {}>()({
   name: "Mutation",
@@ -13,6 +20,6 @@ const Mutation = objectType<Config, {}>()({
   },
 });
 
-export const { schema } = create()
+export const { schema } = create<Config>()
   .register(Query, Mutation)
   .build({ Query: {}, Mutation: {} });

@@ -1,7 +1,7 @@
 import { ModeContextProvider } from "@-ft/mode-next";
 import { cookies } from "next/headers";
 import { PropsWithChildren } from "react";
-import { Locale } from "../../shared/domain/models/Locale";
+import { Locale } from "../../backend/modules/shared/models/Locale";
 
 import "../global.css";
 
