@@ -2,7 +2,7 @@ import { VO } from "../../../framework/VO";
 import { I18nStringInput } from "./I18nStringInput";
 import { Locale, localeEntries } from "./Locale";
 
-export class I18nString implements VO<I18nString> {
+export class I18nString implements VO<I18nString>, I18nStringInput {
   private constructor(
     public readonly original: Locale,
     public readonly translations: Partial<Record<Locale, string>>
@@ -21,7 +21,7 @@ export class I18nString implements VO<I18nString> {
   }
 
   public clone() {
-    return new I18nString(this.original, { ...this.translations });
+    return I18nString.fromInput(this);
   }
 
   public equals(other: I18nString) {
