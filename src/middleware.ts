@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { localeMap } from "../backend/modules/shared/models/Locale";
+import { localeMap } from "./backend/modules/shared/models/Locale";
 
 const allowedPathSegmentsWithoutLocaleSet: Partial<Record<string, boolean>> = {
   "": true,
