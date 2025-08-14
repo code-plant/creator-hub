@@ -1,8 +1,8 @@
 import { AggregateRoot } from "../../../../framework/AggregateRoot";
 import { as } from "../../../../framework/utils/as";
+import { HolderId } from "../../../shared/models/HolderId";
 import { MerchantId } from "../../../shared/models/MerchantId";
 import { UserId } from "../../../shared/models/UserId";
-import { HolderId } from "./HolderId";
 
 export class Holder extends AggregateRoot<HolderId> {
   private constructor(

@@ -6,10 +6,12 @@ import {
   specifiedRules,
   validate,
 } from "graphql";
-import { container } from "../../../backend/container";
-import { createRequestContext } from "../../../backend/createRequestContext";
 import { Context } from "../../../backend/graphql/Context";
 import { schema } from "../../../backend/graphql/schema";
+import { container } from "../../../backend/lib/container";
+import { createRequestContext } from "../../../backend/lib/createRequestContext";
+import { getCookiesFromRequest } from "../../../backend/lib/getCookiesFromRequest";
+import { getOrCreateSession } from "../../../backend/lib/session/getOrCreateSession";
 
 // export const runtime = "nodejs";
 
@@ -87,7 +89,16 @@ async function handle(req: Request): Promise<Response> {
 
     const contextValue: Context = {
       container,
-      requestContext: await createRequestContext(req),
+      requestContext: await createRequestContext(
+        (
+          await getOrCreateSession(
+            getCookiesFromRequest(req)?.SESSION_ID,
+            (req.headers.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0],
+            res
+          )
+        )?.auth,
+        req.headers
+      ),
     };
 
     const result = await execute({

@@ -1,5 +1,1 @@
-import { notFound } from "next/navigation";
-
-export default function NotFound() {
-  notFound();
-}
+export { default } from "../../_lib/utils/next/notFoundHandler";

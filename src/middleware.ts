@@ -7,6 +7,7 @@ const allowedPathSegmentsWithoutLocaleSet: Partial<Record<string, boolean>> = {
   "mode.js": true,
   "favicon.ico": true,
   _next: true,
+  admin: true,
 };
 
 function guessLocaleFromRequest(req: NextRequest) {

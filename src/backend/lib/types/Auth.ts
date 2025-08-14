@@ -1,5 +1,5 @@
-import { User } from "../modules/shared/models/User";
-import { UserId } from "../modules/shared/models/UserId";
+import { UserId } from "../../modules/shared/models/UserId";
+import { UserInfo } from "./UserInfo";
 
 export type Auth = AnonymousAuth | BeforeTosAuth | AuthenticatedAuth;
 
@@ -19,5 +19,5 @@ export interface BeforeMfaAuth {
 
 export interface AuthenticatedAuth {
   type: "authenticated";
-  user: User;
+  userInfo: UserInfo;
 }
