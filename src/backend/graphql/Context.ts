@@ -1,7 +1,7 @@
 import { container } from "../lib/container";
-import { RequestContext } from "../lib/types/RequestContext";
+import { Session } from "../lib/session/Session";
 
 export interface Context {
   container: typeof container;
-  requestContext: RequestContext;
+  session: Session;
 }

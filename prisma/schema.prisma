@@ -1,12 +1,47 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("PRISMA_DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
 }
 
+enum UserRole {
+  user
+  admin
+}
+
 model User {
-  id String @id @default(uuid())
+  id        String   @id @default(uuid())
+  role      UserRole
+  name      String
+  holderId  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  holder Holder @relation(fields: [holderId], references: [id])
+}
+
+enum HolderType {
+  user
+  merchant
+}
+
+model Holder {
+  id       String     @id @default(uuid())
+  type     HolderType
+
+  user     User?
+  merchant Merchant?
+}
+
+model Merchant {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  holderId  String   @unique
+
+  holder Holder @relation(fields: [holderId], references: [id])
 }

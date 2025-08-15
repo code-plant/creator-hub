@@ -9,7 +9,9 @@ export class User extends AggregateRoot<UserId> {
     id: UserId,
     public readonly role: UserRole,
     public readonly name: string,
-    public readonly holderId: HolderId | undefined
+    public readonly holderId: HolderId | undefined,
+    public readonly createdAt: Date,
+    public readonly updatedAt: Date
   ) {
     super(id);
   }
@@ -18,8 +20,10 @@ export class User extends AggregateRoot<UserId> {
     id: string,
     role: UserRole,
     name: string,
-    holderId: string | undefined
+    holderId: string | undefined,
+    createdAt: Date,
+    updatedAt: Date
   ) {
-    return new User(as(id), role, name, as(holderId));
+    return new User(as(id), role, name, as(holderId), createdAt, updatedAt);
   }
 }

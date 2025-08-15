@@ -1,7 +1,9 @@
-export function getCookiesFromRequest(
-  req: Request
+import { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
+
+export function getCookiesFromHeaders(
+  headers: ReadonlyHeaders
 ): Partial<Record<string, string>> | undefined {
-  return req.headers
+  return headers
     .get("cookie")
     ?.split(";")
     .reduce((acc, cookie) => {

@@ -9,8 +9,7 @@ import {
 import { Context } from "../../../backend/graphql/Context";
 import { schema } from "../../../backend/graphql/schema";
 import { container } from "../../../backend/lib/container";
-import { createRequestContext } from "../../../backend/lib/createRequestContext";
-import { getCookiesFromRequest } from "../../../backend/lib/getCookiesFromRequest";
+import { getCookiesFromHeaders } from "../../../backend/lib/getCookiesFromHeaders";
 import { getOrCreateSession } from "../../../backend/lib/session/getOrCreateSession";
 
 // export const runtime = "nodejs";
@@ -87,18 +86,13 @@ async function handle(req: Request): Promise<Response> {
       return json({ errors: validationErrors.map(formatErr) }, { status: 400 });
     }
 
+    const [session, setCookie] = await getOrCreateSession(
+      getCookiesFromHeaders(req.headers)?.SESSION_ID,
+      req.headers
+    );
     const contextValue: Context = {
       container,
-      requestContext: await createRequestContext(
-        (
-          await getOrCreateSession(
-            getCookiesFromRequest(req)?.SESSION_ID,
-            (req.headers.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0],
-            res
-          )
-        )?.auth,
-        req.headers
-      ),
+      session,
     };
 
     const result = await execute({
@@ -110,7 +104,7 @@ async function handle(req: Request): Promise<Response> {
     });
 
     // You may want stricter status mapping; this keeps it simple.
-    return json(result, { status: 200, noStore: true });
+    return json(result, { status: 200, noStore: true, setCookie });
   } catch (err: any) {
     return json({ errors: [formatErr(err)] }, { status: 500 });
   }
@@ -149,9 +143,14 @@ function formatErr(e: unknown) {
 
 function json(
   data: unknown,
-  opts?: { status?: number; noStore?: boolean }
+  opts?: {
+    status?: number;
+    noStore?: boolean;
+    setCookie?: Partial<Record<string, string>>;
+  }
 ): Response {
   const headers = new Headers({
+    ...opts?.setCookie,
     "content-type": "application/json; charset=utf-8",
   });
   if (opts?.noStore) headers.set("cache-control", "no-store");
