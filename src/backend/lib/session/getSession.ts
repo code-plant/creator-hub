@@ -1,9 +1,11 @@
 import { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
+import { RedisClient } from "../../framework/infrastructure/redis/redis";
 import { Session } from "./Session";
 
 export async function getSession(
   sessionId: string | undefined,
-  headers: ReadonlyHeaders
+  headers: ReadonlyHeaders,
+  redis: RedisClient
 ): Promise<Session | undefined> {
   if (!sessionId) {
     return undefined;
@@ -13,5 +15,17 @@ export async function getSession(
     ","
   )[0];
 
-  // TODO: add redis session store
+  const sessionJson = await redis.get(`session:${sessionId}`);
+  if (!sessionJson) {
+    return undefined;
+  }
+
+  const session = JSON.parse(sessionJson) as Session;
+  if (session.expireOnIpChange && session.previousIpAddress !== ipAddress) {
+    await redis.del(`session:${sessionId}`);
+    return undefined;
+  }
+  session.previousIpAddress = ipAddress;
+
+  return session;
 }

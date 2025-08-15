@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = env("PRISMA_DATABASE_URL")
+  url      = env("PRISMA_DB_URL")
 }
 
 generator client {
@@ -13,14 +13,53 @@ enum UserRole {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.Uuid
   role      UserRole
   name      String
-  holderId  String   @unique
+  holderId  String   @unique @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  holder Holder @relation(fields: [holderId], references: [id])
+  holder                Holder                     @relation(fields: [holderId], references: [id])
+  authenticationMethods UserAuthenticationMethod[]
+}
+
+enum UserAuthenticationMethodTag {
+  primary
+  backup
+}
+
+model UserAuthenticationMethod {
+  id        String                      @id @default(uuid()) @db.Uuid
+  tag       UserAuthenticationMethodTag
+  userId    String                      @db.Uuid
+  createdAt DateTime                    @default(now())
+  updatedAt DateTime                    @updatedAt
+
+  user  User                     @relation(fields: [userId], references: [id])
+  steps UserAuthenticationStep[]
+
+  @@unique([userId, tag])
+}
+
+enum UserAuthenticationStepType {
+  email
+  password
+  oauth2
+}
+
+model UserAuthenticationStep {
+  id        String                     @id @default(uuid()) @db.Uuid
+  methodId  String                     @db.Uuid
+  type      UserAuthenticationStepType
+  createdAt DateTime                   @default(now())
+  updatedAt DateTime                   @updatedAt
+  order     Int
+  data      String
+
+  method UserAuthenticationMethod @relation(fields: [methodId], references: [id])
+
+  @@unique([methodId, order])
 }
 
 enum HolderType {
@@ -29,19 +68,19 @@ enum HolderType {
 }
 
 model Holder {
-  id       String     @id @default(uuid())
-  type     HolderType
+  id   String     @id @default(uuid()) @db.Uuid
+  type HolderType
 
   user     User?
   merchant Merchant?
 }
 
 model Merchant {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.Uuid
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  holderId  String   @unique
+  holderId  String   @unique @db.Uuid
 
   holder Holder @relation(fields: [holderId], references: [id])
 }

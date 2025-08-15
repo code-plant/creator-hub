@@ -1,0 +1,33 @@
+services:
+  postgresql:
+    image: postgres:latest
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 2GB
+  redis: # TODO: turn into valkey
+    image: redis/redis-stack-server:latest
+    environment:
+      - REDIS_ARGS=--save 1200 32
+    volumes:
+      - ./volumes/redis:/data
+    ports:
+      - 127.0.0.1:6379:6379
+      - 127.0.0.1:6380:6380
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"
+      - "127.0.0.1:4510-4559:4510-4559"
+    environment:
+      - DEBUG=1
+    volumes:
+      - "./volumes/localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"

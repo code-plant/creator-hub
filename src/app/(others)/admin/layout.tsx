@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
+import { container } from "../../../backend/lib/container";
 import { getCookiesFromHeaders } from "../../../backend/lib/getCookiesFromHeaders";
 import { getSession } from "../../../backend/lib/session/getSession";
 
@@ -8,7 +9,8 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
   const header = await headers();
   const session = await getSession(
     getCookiesFromHeaders(header)?.SESSION_ID,
-    header
+    header,
+    container.redis
   );
   if (session?.auth.type === "anonymous") {
     redirect("/login");

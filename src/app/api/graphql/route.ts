@@ -88,7 +88,8 @@ async function handle(req: Request): Promise<Response> {
 
     const [session, setCookie] = await getOrCreateSession(
       getCookiesFromHeaders(req.headers)?.SESSION_ID,
-      req.headers
+      req.headers,
+      container.redis
     );
     const contextValue: Context = {
       container,
