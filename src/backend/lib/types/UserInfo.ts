@@ -1,6 +1,6 @@
-import { HolderId } from "../../modules/shared/models/HolderId";
-import { UserId } from "../../modules/shared/models/UserId";
-import { UserRole } from "../../modules/shared/models/UserRole";
+import { HolderId } from "../../modules/shared/domain/models/HolderId";
+import { UserId } from "../../modules/shared/domain/models/UserId";
+import { UserRole } from "../../modules/shared/domain/models/UserRole";
 
 export interface UserInfo {
   id: UserId;

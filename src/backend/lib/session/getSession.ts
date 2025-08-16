@@ -1,6 +1,7 @@
-import { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
+import { ReadonlyHeaders } from "../../framework/infrastructure/ReadOnlyHeaders";
 import { RedisClient } from "../../framework/infrastructure/redis/redis";
 import { Session } from "./Session";
+import { saveSession } from "./saveSession";
 
 export async function getSession(
   sessionId: string | undefined,
@@ -26,6 +27,8 @@ export async function getSession(
     return undefined;
   }
   session.previousIpAddress = ipAddress;
+  session.lastUsedAtNumber = Date.now();
+  await saveSession(session, redis);
 
   return session;
 }

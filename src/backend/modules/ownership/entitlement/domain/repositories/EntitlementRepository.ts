@@ -1,7 +1,7 @@
 import { Connection } from "../../../../../framework/types/Connection";
-import { ItemId } from "../../../../shared/models/ItemId";
-import { UserId } from "../../../../shared/models/UserId";
-import { EntitlementId } from "../../../shared/models/EntitlementId";
+import { ItemId } from "../../../../shared/domain/models/ItemId";
+import { UserId } from "../../../../shared/domain/models/UserId";
+import { EntitlementId } from "../../../shared/domain/models/EntitlementId";
 import { Entitlement } from "../models/Entitlement";
 
 export interface EntitlementRepository {

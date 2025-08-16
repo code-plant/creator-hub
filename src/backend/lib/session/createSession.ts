@@ -1,16 +1,18 @@
-import { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
 import { v4 } from "uuid";
+import { ReadonlyHeaders } from "../../framework/infrastructure/ReadOnlyHeaders";
+import { RedisClient } from "../../framework/infrastructure/redis/redis";
 import { Session } from "./Session";
+import { saveSession } from "./saveSession";
 
 export async function createSession(
-  headers: ReadonlyHeaders
+  headers: ReadonlyHeaders,
+  redis: RedisClient
 ): Promise<[session: Session, setCookie: Partial<Record<string, string>>]> {
   const ipAddress = (headers.get("x-forwarded-for") ?? "127.0.0.1").split(
     ","
   )[0];
   const sessionId = v4();
 
-  // TODO: add redis session store
   const session: Session = {
     id: sessionId,
     auth: {
@@ -19,7 +21,11 @@ export async function createSession(
     previousIpAddress: ipAddress,
     createdAt: new Date(),
     expireOnIpChange: false,
+    lastUsedAtNumber: Date.now(),
+    expiresAfterNumber: 1800000, // 30 minutes
   };
+
+  await saveSession(session, redis);
 
   return [
     session,

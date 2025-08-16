@@ -6,4 +6,6 @@ export interface Session {
   previousIpAddress: string;
   createdAt: Date;
   expireOnIpChange: boolean;
+  expiresAfterNumber: number;
+  lastUsedAtNumber: number;
 }

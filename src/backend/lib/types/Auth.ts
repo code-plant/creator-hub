@@ -1,7 +1,11 @@
-import { UserId } from "../../modules/shared/models/UserId";
+import { UserId } from "../../modules/shared/domain/models/UserId";
 import { UserInfo } from "./UserInfo";
 
-export type Auth = AnonymousAuth | BeforeTosAuth | AuthenticatedAuth;
+export type Auth =
+  | AnonymousAuth
+  | BeforeTosAuth
+  | BeforeMfaAuth
+  | AuthenticatedAuth;
 
 export interface AnonymousAuth {
   type: "anonymous";

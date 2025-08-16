@@ -1,4 +1,4 @@
-import { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
+import { ReadonlyHeaders } from "../../framework/infrastructure/ReadOnlyHeaders";
 import { RedisClient } from "../../framework/infrastructure/redis/redis";
 import { Session } from "./Session";
 import { createSession } from "./createSession";
@@ -15,7 +15,7 @@ export async function getOrCreateSession(
     return [existingSession, {}];
   }
 
-  const [session, setCookie] = await createSession(headers);
+  const [session, setCookie] = await createSession(headers, redis);
   await saveSession(session, redis);
   return [session, setCookie];
 }

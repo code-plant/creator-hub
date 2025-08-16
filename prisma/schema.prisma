@@ -13,15 +13,48 @@ enum UserRole {
 }
 
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  role      UserRole
-  name      String
-  holderId  String   @unique @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String    @id @default(uuid()) @db.Uuid
+  role       UserRole
+  // can be null if the user is deleted
+  nameI18n   String?
+  holderId   String    @unique @db.Uuid
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  tosVersion Int
+  deletedAt  DateTime?
 
   holder                Holder                     @relation(fields: [holderId], references: [id])
   authenticationMethods UserAuthenticationMethod[]
+  emails                UserEmailRc[]
+  oauth2Accounts        UserOauth2AccountRc[]
+}
+
+// email referenced by UserAuthenticationStep
+model UserEmailRc {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @db.Uuid
+  email          String    @unique
+  verifiedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  referenceCount Int
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// OAuth2 account referenced by UserAuthenticationStep
+model UserOauth2AccountRc {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @db.Uuid
+  provider          String
+  providerAccountId String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  referenceCount    Int
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
 }
 
 enum UserAuthenticationMethodTag {
@@ -77,7 +110,7 @@ model Holder {
 
 model Merchant {
   id        String   @id @default(uuid()) @db.Uuid
-  name      String
+  nameI18n  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   holderId  String   @unique @db.Uuid

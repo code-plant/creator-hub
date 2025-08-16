@@ -1,9 +1,9 @@
 import { Entity } from "../../../../../framework/Entity";
 import { as } from "../../../../../framework/utils/as";
-import { HolderId } from "../../../../shared/models/HolderId";
-import { ItemId } from "../../../../shared/models/ItemId";
-import { UserId } from "../../../../shared/models/UserId";
-import { EntitlementId } from "../../../shared/models/EntitlementId";
+import { HolderId } from "../../../../shared/domain/models/HolderId";
+import { ItemId } from "../../../../shared/domain/models/ItemId";
+import { UserId } from "../../../../shared/domain/models/UserId";
+import { EntitlementId } from "../../../shared/domain/models/EntitlementId";
 import { EntitlementType } from "./EntitlementType";
 
 export class Entitlement extends Entity<EntitlementId> {

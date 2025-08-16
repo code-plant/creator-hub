@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { localeMap } from "./backend/modules/shared/models/Locale";
+import { guessLocaleFromHeaders } from "./backend/framework/infrastructure/guessLocaleFromHeaders";
+import { localeMap } from "./backend/modules/shared/domain/models/Locale";
 
 const allowedPathSegmentsWithoutLocaleSet: Partial<Record<string, boolean>> = {
   "": true,
@@ -11,12 +12,7 @@ const allowedPathSegmentsWithoutLocaleSet: Partial<Record<string, boolean>> = {
 };
 
 function guessLocaleFromRequest(req: NextRequest) {
-  const cookie = req.cookies.get("LOCALE")?.value;
-  if (cookie && localeMap[cookie]) {
-    return cookie;
-  }
-  // TODO: use x-vercel-ip-country header
-  return "en";
+  return guessLocaleFromHeaders(req.headers);
 }
 
 export default async function middleware(
