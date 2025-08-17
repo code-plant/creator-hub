@@ -14,19 +14,13 @@ const defaultName: Record<Locale, string> = {
 };
 
 export class AuthenticationDomainService {
-  private readonly session: PrismaSession;
   private readonly authenticationRepository: AuthenticationRepository;
   private readonly userEmailRcRepository: UserEmailRcRepository;
 
   constructor({
-    session,
     authenticationRepository,
     userEmailRcRepository,
-  }: Pick<
-    AuthAll,
-    "session" | "authenticationRepository" | "userEmailRcRepository"
-  >) {
-    this.session = session;
+  }: Pick<AuthAll, "authenticationRepository" | "userEmailRcRepository">) {
     this.authenticationRepository = authenticationRepository;
     this.userEmailRcRepository = userEmailRcRepository;
   }
@@ -41,6 +35,7 @@ export class AuthenticationDomainService {
   }
 
   async updateEmailAsVerified(
+    session: PrismaSession,
     id: UserId,
     email: string,
     emailVerified: Date
@@ -52,7 +47,7 @@ export class AuthenticationDomainService {
       throw new Error("Email is not owned by the user");
     }
     userEmailRc.verifiedAt = emailVerified;
-    await this.userEmailRcRepository.save(this.session, userEmailRc);
+    await this.userEmailRcRepository.save(session, userEmailRc);
     return unwrapNonNullable(await this.authenticationRepository.find(id));
   }
 }

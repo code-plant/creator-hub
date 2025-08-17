@@ -1,4 +1,4 @@
-import { User as PrismaUser } from "@prisma/client";
+import { PrismaClient, User as PrismaUser } from "@prisma/client";
 import { optional } from "../../../../../../common/utils/optional";
 import { PrismaSession } from "../../../../../framework/infrastructure/PrismaSession";
 import { SharedAll } from "../../../../../framework/types/SharedAll";
@@ -8,14 +8,14 @@ import { User } from "../../domain/models/User";
 import { AuthenticationRepository } from "../../domain/repositories/AuthenticationRepository";
 
 export class AuthenticationRepositoryImpl implements AuthenticationRepository {
-  private readonly session: PrismaSession;
+  private readonly prisma: PrismaClient;
 
-  constructor({ session }: Pick<SharedAll, "session">) {
-    this.session = session;
+  constructor({ prisma }: Pick<SharedAll, "prisma">) {
+    this.prisma = prisma;
   }
 
   async create(name: I18nString): Promise<User> {
-    const user = await this.session.db.user.create({
+    const user = await this.prisma.user.create({
       data: {
         nameI18n: name.toDBText(),
         role: "user",
@@ -28,7 +28,7 @@ export class AuthenticationRepositoryImpl implements AuthenticationRepository {
   }
 
   async find(userId: UserId): Promise<User | null> {
-    const user = await this.session.db.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
     if (!user) {
@@ -39,7 +39,7 @@ export class AuthenticationRepositoryImpl implements AuthenticationRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const emailRc = await this.session.db.userEmailRc.findUnique({
+    const emailRc = await this.prisma.userEmailRc.findUnique({
       where: { email },
       select: { user: true },
     });
@@ -54,11 +54,10 @@ export class AuthenticationRepositoryImpl implements AuthenticationRepository {
     provider: string,
     providerAccountId: string
   ): Promise<User | null> {
-    const oauth2AccountRc =
-      await this.session.db.userOauth2AccountRc.findUnique({
-        where: { provider_providerAccountId: { provider, providerAccountId } },
-        select: { user: true },
-      });
+    const oauth2AccountRc = await this.prisma.userOauth2AccountRc.findUnique({
+      where: { provider_providerAccountId: { provider, providerAccountId } },
+      select: { user: true },
+    });
     if (!oauth2AccountRc) {
       return null;
     }
@@ -75,5 +74,17 @@ export class AuthenticationRepositoryImpl implements AuthenticationRepository {
       user.tosVersion,
       user.deletedAt ?? undefined
     );
+  }
+
+  async save(session: PrismaSession, user: User): Promise<void> {
+    user.events.length = 0;
+    await session.db.user.update({
+      where: { id: user.id },
+      data: {
+        tosVersion: user.tosVersion,
+        deletedAt: user.deletedAt ?? null,
+        nameI18n: user.name?.toDBText() ?? null,
+      },
+    });
   }
 }

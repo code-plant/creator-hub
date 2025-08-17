@@ -2,9 +2,11 @@ import NextAuth from "next-auth";
 import { Adapter, AdapterUser } from "next-auth/adapters";
 import { validate } from "uuid";
 import { guessLocaleFromHeaders } from "../../../../backend/framework/infrastructure/guessLocaleFromHeaders";
+import { HandlerContext } from "../../../../backend/framework/types/HandlerContext";
 import { as } from "../../../../backend/framework/utils/as";
 import { userIdFromAuth } from "../../../../backend/lib/auth/userIdFromAuth";
 import { container } from "../../../../backend/lib/container";
+import { getCookiesFromHeaders } from "../../../../backend/lib/getCookiesFromHeaders";
 import { getSession } from "../../../../backend/lib/session/getSession";
 import { UserDto } from "../../../../backend/modules/auth/authentication/application/dtos/UserDto";
 import { env } from "../../../../backend/utils/env";
@@ -30,111 +32,122 @@ async function handler(
   req: Request,
   context: Record<"params", Promise<Record<"nextauth", string[]>>>
 ) {
-  const adapter: Required<Adapter> = {
-    createUser: async () => {
-      return adapterUser(
-        await container.authenticationDomainService.createUser(
-          guessLocaleFromHeaders(req.headers)
-        )
-      );
-    },
-
-    getUser: async (id) => {
-      const { user } = await container.getUserHandler.handle(
-        container.session,
-        { id }
-      );
-      return adapterUser(user);
-    },
-
-    getUserByEmail: async (email) => {
-      if (email.endsWith(FAKE_EMAIL_SUFFIX)) {
-        const id = email.slice(0, -FAKE_EMAIL_SUFFIX.length);
-        if (!validate(id)) {
-          return null;
-        }
-        return adapterUser(
-          await container.authenticationApplicationService.getUser(as(id))
-        );
-      }
-
-      return adapterUser(
-        await container.authenticationApplicationService.getUserByEmail(email)
-      );
-    },
-
-    getUserByAccount: async ({ provider, providerAccountId }) => {
-      return adapterUser(
-        await container.authenticationApplicationService.getUserByAccount(
-          provider,
-          providerAccountId
-        )
-      );
-    },
-
-    updateUser: async ({ id, email, emailVerified }) => {
-      if (email && emailVerified) {
-        return adapterUser(
-          await container.authenticationDomainService.updateEmailAsVerified(
-            as(id),
-            email,
-            emailVerified
-          )
-        );
-      } else {
-        return unwrapNonNullable(
-          adapterUser(
-            await container.authenticationApplicationService.getUser(as(id))
-          )
-        );
-      }
-    },
-
-    deleteUser: async (id) => {
-      return adapterUser(
-        await container.authenticationDomainService.deleteUser(as(id))
-      );
-    },
-
-    getSessionAndUser: async (sessionToken) => {
-      const session = await getSession(
-        sessionToken,
+  return await container.session.unitOfWork(async (session) => {
+    const ctx: HandlerContext = {
+      session,
+      request: await getSession(
+        getCookiesFromHeaders(req.headers)?.SESSION_ID,
         req.headers,
         container.redis
-      );
-      if (!session) {
-        return null;
-      }
+      ),
+    };
 
-      const userId = userIdFromAuth(session.auth);
-      if (!userId) {
-        return null;
-      }
+    const adapter: Required<Adapter> = {
+      createUser: async () => {
+        return adapterUser(
+          await container.authenticationDomainService.createUser(
+            guessLocaleFromHeaders(req.headers)
+          )
+        );
+      },
 
-      return {
-        session: {
+      getUser: async (id) => {
+        const { user } = await container.getUserHandler.handle(ctx, { id });
+        return adapterUser(user);
+      },
+
+      getUserByEmail: async (email) => {
+        if (email.endsWith(FAKE_EMAIL_SUFFIX)) {
+          const id = email.slice(0, -FAKE_EMAIL_SUFFIX.length);
+          if (!validate(id)) {
+            return null;
+          }
+          const { user } = await container.getUserHandler.handle(ctx, { id });
+          return adapterUser(user);
+        }
+
+        return adapterUser(
+          await container.authenticationApplicationService.getUserByEmail(email)
+        );
+      },
+
+      getUserByAccount: async ({ provider, providerAccountId }) => {
+        return adapterUser(
+          await container.authenticationApplicationService.getUserByAccount(
+            provider,
+            providerAccountId
+          )
+        );
+      },
+
+      updateUser: async ({ id, email, emailVerified }) => {
+        if (email && emailVerified) {
+          return adapterUser(
+            await container.authenticationDomainService.updateEmailAsVerified(
+              container.session,
+              as(id),
+              email,
+              emailVerified
+            )
+          );
+        } else {
+          const { user } = await container.getUserHandler.handle(ctx, { id });
+          return unwrapNonNullable(adapterUser(user));
+        }
+      },
+
+      deleteUser: async (id) => {
+        const { success } = await container.deleteUserHandler.handle(ctx, {
+          id,
+        });
+        if (!success) {
+          // TODO: log error
+          const { user } = await container.getUserHandler.handle(ctx, { id });
+          return unwrapNonNullable(adapterUser(user));
+        }
+        return undefined;
+      },
+
+      getSessionAndUser: async (sessionToken) => {
+        const session = await getSession(
           sessionToken,
-          userId,
-          expires: new Date(
-            session.lastUsedAtNumber + session.expiresAfterNumber
-          ),
-        },
-        user: {
-          id: userId,
-          email: fakeEmail(userId),
-          emailVerified: fakeDate,
-        },
-      };
-    },
-  };
+          req.headers,
+          container.redis
+        );
+        if (!session) {
+          return null;
+        }
 
-  const handler = NextAuth({
-    providers: [],
-    secret: env("NEXTAUTH_SECRET"),
-    adapter,
+        const userId = userIdFromAuth(session.auth);
+        if (!userId) {
+          return null;
+        }
+
+        return {
+          session: {
+            sessionToken,
+            userId,
+            expires: new Date(
+              session.lastUsedAtNumber + session.expiresAfterNumber
+            ),
+          },
+          user: {
+            id: userId,
+            email: fakeEmail(userId),
+            emailVerified: fakeDate,
+          },
+        };
+      },
+    };
+
+    const handler = NextAuth({
+      providers: [],
+      secret: env("NEXTAUTH_SECRET"),
+      adapter,
+    });
+
+    return await handler(req, context);
   });
-
-  return await handler(req, context);
 }
 
 export { handler as GET, handler as POST };

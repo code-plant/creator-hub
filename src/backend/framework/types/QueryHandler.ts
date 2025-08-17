@@ -1,5 +1,5 @@
-import { PrismaSession } from "../infrastructure/PrismaSession";
+import { HandlerContext } from "./HandlerContext";
 
 export interface QueryHandler<T, R> {
-  handle: (session: PrismaSession, query: T) => Promise<R>;
+  handle: (context: HandlerContext, query: T) => Promise<R>;
 }

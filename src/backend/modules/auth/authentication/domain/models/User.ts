@@ -1,11 +1,14 @@
 import { Entity } from "../../../../../framework/Entity";
 import { as } from "../../../../../framework/utils/as";
+import { userIdFromAuth } from "../../../../../lib/auth/userIdFromAuth";
+import { Session } from "../../../../../lib/session/Session";
 import { I18nString } from "../../../../shared/domain/models/I18nString";
 import { UserId } from "../../../../shared/domain/models/UserId";
+import { InsufficientPermissionError } from "../../../shared/application/errors/InsufficientPermissionError";
 import { UserEvent } from "../events/UserEvent";
 
 export class User extends Entity<UserId> {
-  private readonly events: UserEvent[];
+  public readonly events: UserEvent[];
 
   private constructor(
     id: UserId,
@@ -40,7 +43,10 @@ export class User extends Entity<UserId> {
     return this._deletedAt;
   }
 
-  delete() {
+  delete(request: Session | undefined) {
+    if (userIdFromAuth(request?.auth) !== this.id) {
+      throw new InsufficientPermissionError("User is not the current user");
+    }
     const now = new Date();
     this._deletedAt = now;
     this._name = undefined;

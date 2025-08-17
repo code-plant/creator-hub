@@ -1,9 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaSession } from "../infrastructure/PrismaSession";
+import { DefaultPrismaSession } from "../infrastructure/PrismaSession";
 import { RedisClient } from "../infrastructure/redis/redis";
 
 export type SharedAll = {
   prisma: PrismaClient;
-  session: PrismaSession;
+  session: DefaultPrismaSession;
   redis: RedisClient;
 };

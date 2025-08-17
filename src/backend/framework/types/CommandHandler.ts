@@ -1,5 +1,5 @@
-import { PrismaSession } from "../infrastructure/PrismaSession";
+import { HandlerContext } from "./HandlerContext";
 
 export interface CommandHandler<T, R> {
-  handle: (session: PrismaSession, command: T) => Promise<R>;
+  handle: (context: HandlerContext, command: T) => Promise<R>;
 }

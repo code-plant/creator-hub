@@ -1,3 +1,4 @@
+import { PrismaSession } from "../../../../../framework/infrastructure/PrismaSession";
 import { I18nString } from "../../../../shared/domain/models/I18nString";
 import { UserId } from "../../../../shared/domain/models/UserId";
 import { User } from "../models/User";
@@ -10,4 +11,5 @@ export interface AuthenticationRepository {
     provider: string,
     providerAccountId: string
   ): Promise<User | null>;
+  save(session: PrismaSession, user: User): Promise<void>;
 }

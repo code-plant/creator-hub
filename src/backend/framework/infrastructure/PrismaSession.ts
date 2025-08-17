@@ -16,10 +16,23 @@ export interface PrismaSession {
   ) => Promise<T>;
 
   db: TransactionPrisma;
+  addBeforeCommit: (func: () => Awaitable<void>) => Promise<void>;
+}
+
+export interface DefaultPrismaSession extends PrismaSession {
+  unitOfWork: <T>(func: (session: PrismaSession) => Awaitable<T>) => Promise<T>;
 }
 
 export class TransactionSession implements PrismaSession {
-  constructor(public readonly db: TransactionPrisma) {}
+  constructor(
+    public readonly db: TransactionPrisma,
+    private readonly beforeCommit: (() => Awaitable<void>)[]
+  ) {}
+
+  addBeforeCommit(func: () => Awaitable<void>) {
+    this.beforeCommit.push(func);
+    return Promise.resolve();
+  }
 
   async transaction<T>(
     func: (session: PrismaSession) => Awaitable<T>
@@ -28,11 +41,11 @@ export class TransactionSession implements PrismaSession {
   }
 }
 
-export class DefaultSession implements PrismaSession {
-  public db: PrismaClient;
+export class NonTransactionSession implements PrismaSession {
+  constructor(public readonly db: PrismaClient) {}
 
-  constructor({ prisma }: Pick<SharedAll, "prisma">) {
-    this.db = prisma;
+  async addBeforeCommit(func: () => Awaitable<void>) {
+    await func();
   }
 
   async transaction<T>(
@@ -41,12 +54,61 @@ export class DefaultSession implements PrismaSession {
   ): Promise<T> {
     const result = await this.db.$transaction(
       async (tx) => {
-        const ts = new TransactionSession(tx);
-        return await func(ts);
+        const beforeCommit: (() => Awaitable<void>)[] = [];
+        const result = await func(new TransactionSession(tx, beforeCommit));
+        for (const func of beforeCommit) {
+          await func();
+        }
+        return result;
       },
       { timeout }
     );
 
     return result;
+  }
+}
+
+export class DefaultSession implements DefaultPrismaSession {
+  private readonly _db: PrismaClient;
+
+  constructor({ prisma }: Pick<SharedAll, "prisma">) {
+    this._db = prisma;
+  }
+
+  addBeforeCommit(_func: () => Awaitable<void>): Promise<void> {
+    throw new Error(
+      "DefaultSession is used directly. Use unitOfWork or transaction instead."
+    );
+  }
+
+  get db(): never {
+    throw new Error(
+      "DefaultSession is used directly. Use unitOfWork or transaction instead."
+    );
+  }
+
+  async transaction<T>(
+    func: (session: PrismaSession) => Awaitable<T>,
+    { timeout }: TransactionOption = {}
+  ): Promise<T> {
+    const result = await this._db.$transaction(
+      async (tx) => {
+        const beforeCommit: (() => Awaitable<void>)[] = [];
+        const result = await func(new TransactionSession(tx, beforeCommit));
+        for (const func of beforeCommit) {
+          await func();
+        }
+        return result;
+      },
+      { timeout }
+    );
+
+    return result;
+  }
+
+  async unitOfWork<T>(
+    func: (session: PrismaSession) => Awaitable<T>
+  ): Promise<T> {
+    return await func(new NonTransactionSession(this._db));
   }
 }

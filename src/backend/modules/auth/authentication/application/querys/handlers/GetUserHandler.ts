@@ -1,4 +1,4 @@
-import { PrismaSession } from "../../../../../../framework/infrastructure/PrismaSession";
+import { HandlerContext } from "../../../../../../framework/types/HandlerContext";
 import { QueryHandler } from "../../../../../../framework/types/QueryHandler";
 import { as } from "../../../../../../framework/utils/as";
 import { AuthAll } from "../../../../AuthAll";
@@ -17,7 +17,7 @@ export class GetUserHandler
   }
 
   async handle(
-    _session: PrismaSession,
+    _context: HandlerContext,
     query: GetUserInput
   ): Promise<GetUserOutput> {
     const user = await this.authenticationRepository.find(as(query.id));
