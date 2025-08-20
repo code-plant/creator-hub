@@ -16,7 +16,7 @@ export class User extends AggregateRoot<UserId> {
     super(id);
   }
 
-  public static reconstitute(
+  static reconstitute(
     id: string,
     role: UserRole,
     name: string,

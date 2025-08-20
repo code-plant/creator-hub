@@ -19,7 +19,7 @@ export class Holder extends AggregateRoot<HolderId> {
     }
   }
 
-  public static reconstitute(
+  static reconstitute(
     id: string,
     name: string,
     userId: string | undefined,

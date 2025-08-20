@@ -22,11 +22,11 @@ export class User extends Entity<UserId> {
     this.events = [];
   }
 
-  public get name(): I18nString | undefined {
+  get name(): I18nString | undefined {
     return this._name;
   }
 
-  public set name(name: I18nString) {
+  set name(name: I18nString) {
     if (this._deletedAt) {
       throw new Error("User is deleted");
     }
@@ -39,7 +39,7 @@ export class User extends Entity<UserId> {
     });
   }
 
-  public get deletedAt(): Date | undefined {
+  get deletedAt(): Date | undefined {
     return this._deletedAt;
   }
 
@@ -57,7 +57,7 @@ export class User extends Entity<UserId> {
     });
   }
 
-  public static reconstitute(
+  static reconstitute(
     id: string,
     name: I18nString | undefined,
     createdAt: Date,

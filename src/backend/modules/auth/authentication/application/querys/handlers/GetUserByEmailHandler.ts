@@ -1,12 +1,11 @@
 import { HandlerContext } from "../../../../../../framework/types/HandlerContext";
 import { QueryHandler } from "../../../../../../framework/types/QueryHandler";
-import { as } from "../../../../../../framework/utils/as";
 import { AuthAll } from "../../../../AuthAll";
 import { AuthenticationRepository } from "../../../domain/repositories/AuthenticationRepository";
-import { GetUserInput, GetUserOutput } from "../GetUser";
+import { GetUserByEmailInput, GetUserByEmailOutput } from "../GetUserByEmail";
 
-export class GetUserHandler
-  implements QueryHandler<GetUserInput, GetUserOutput>
+export class GetUserByEmailHandler
+  implements QueryHandler<GetUserByEmailInput, GetUserByEmailOutput>
 {
   private readonly authenticationRepository: AuthenticationRepository;
 
@@ -18,9 +17,9 @@ export class GetUserHandler
 
   async handle(
     _context: HandlerContext,
-    { id }: GetUserInput
-  ): Promise<GetUserOutput> {
-    const user = await this.authenticationRepository.find(as(id));
+    { email }: GetUserByEmailInput
+  ): Promise<GetUserByEmailOutput> {
+    const user = await this.authenticationRepository.findByEmail(email);
     return { user };
   }
 }

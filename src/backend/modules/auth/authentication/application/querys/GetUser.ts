@@ -5,5 +5,5 @@ export interface GetUserInput {
 }
 
 export interface GetUserOutput {
-  user: UserDto | null;
+  user: UserDto | undefined;
 }

@@ -15,7 +15,7 @@ export class UserEmailRc extends Entity<UserEmailRcId> {
     super(id);
   }
 
-  public static reconstitute(
+  static reconstitute(
     id: string,
     email: string,
     verifiedAt: Date | undefined,

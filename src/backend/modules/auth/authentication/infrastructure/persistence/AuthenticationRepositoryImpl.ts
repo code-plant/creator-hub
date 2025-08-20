@@ -27,24 +27,24 @@ export class AuthenticationRepositoryImpl implements AuthenticationRepository {
     return AuthenticationRepositoryImpl.fromPrismaUser(user);
   }
 
-  async find(userId: UserId): Promise<User | null> {
+  async find(userId: UserId): Promise<User | undefined> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
     if (!user) {
-      return null;
+      return undefined;
     }
 
     return AuthenticationRepositoryImpl.fromPrismaUser(user);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<User | undefined> {
     const emailRc = await this.prisma.userEmailRc.findUnique({
       where: { email },
       select: { user: true },
     });
     if (!emailRc) {
-      return null;
+      return undefined;
     }
 
     return AuthenticationRepositoryImpl.fromPrismaUser(emailRc.user);
@@ -53,13 +53,13 @@ export class AuthenticationRepositoryImpl implements AuthenticationRepository {
   async findByAccount(
     provider: string,
     providerAccountId: string
-  ): Promise<User | null> {
+  ): Promise<User | undefined> {
     const oauth2AccountRc = await this.prisma.userOauth2AccountRc.findUnique({
       where: { provider_providerAccountId: { provider, providerAccountId } },
       select: { user: true },
     });
     if (!oauth2AccountRc) {
-      return null;
+      return undefined;
     }
 
     return AuthenticationRepositoryImpl.fromPrismaUser(oauth2AccountRc.user);

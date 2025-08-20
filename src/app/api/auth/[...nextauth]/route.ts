@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import { Adapter, AdapterUser } from "next-auth/adapters";
+import { Adapter, AdapterAccount, AdapterUser } from "next-auth/adapters";
 import { validate } from "uuid";
 import { guessLocaleFromHeaders } from "../../../../backend/framework/infrastructure/guessLocaleFromHeaders";
 import { HandlerContext } from "../../../../backend/framework/types/HandlerContext";
@@ -33,14 +33,12 @@ async function handler(
   context: Record<"params", Promise<Record<"nextauth", string[]>>>
 ) {
   return await container.session.unitOfWork(async (session) => {
-    const ctx: HandlerContext = {
-      session,
-      request: await getSession(
-        getCookiesFromHeaders(req.headers)?.SESSION_ID,
-        req.headers,
-        container.redis
-      ),
-    };
+    const request = await getSession(
+      getCookiesFromHeaders(req.headers)?.SESSION_ID,
+      req.headers,
+      container.redis
+    );
+    const ctx: HandlerContext = { session, request };
 
     const adapter: Required<Adapter> = {
       createUser: async () => {
@@ -66,25 +64,25 @@ async function handler(
           return adapterUser(user);
         }
 
-        return adapterUser(
-          await container.authenticationApplicationService.getUserByEmail(email)
-        );
+        const { user } = await container.getUserByEmailHandler.handle(ctx, {
+          email,
+        });
+        return adapterUser(user);
       },
 
       getUserByAccount: async ({ provider, providerAccountId }) => {
-        return adapterUser(
-          await container.authenticationApplicationService.getUserByAccount(
-            provider,
-            providerAccountId
-          )
-        );
+        const { user } = await container.getUserByAccountHandler.handle(ctx, {
+          provider,
+          providerAccountId,
+        });
+        return adapterUser(user);
       },
 
       updateUser: async ({ id, email, emailVerified }) => {
         if (email && emailVerified) {
           return adapterUser(
             await container.authenticationDomainService.updateEmailAsVerified(
-              container.session,
+              session,
               as(id),
               email,
               emailVerified
@@ -106,6 +104,21 @@ async function handler(
           return unwrapNonNullable(adapterUser(user));
         }
         return undefined;
+      },
+
+      linkAccount: async ({
+        provider,
+        providerAccountId,
+        userId,
+      }: AdapterAccount) => {
+        return adapterUser(
+          await container.authenticationApplicationService.linkAccount(
+            session,
+            userId,
+            provider,
+            providerAccountId
+          )
+        );
       },
 
       getSessionAndUser: async (sessionToken) => {

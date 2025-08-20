@@ -16,7 +16,7 @@ export class Item extends AggregateRoot<ItemId> {
     super(id);
   }
 
-  public static reconstitute(
+  static reconstitute(
     id: string,
     ownerId: string,
     productId: string,

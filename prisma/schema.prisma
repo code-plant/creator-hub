@@ -63,11 +63,11 @@ enum UserAuthenticationMethodTag {
 }
 
 model UserAuthenticationMethod {
-  id        String                      @id @default(uuid()) @db.Uuid
-  tag       UserAuthenticationMethodTag
-  userId    String                      @db.Uuid
-  createdAt DateTime                    @default(now())
-  updatedAt DateTime                    @updatedAt
+  id        String                       @id @default(uuid()) @db.Uuid
+  tag       UserAuthenticationMethodTag?
+  userId    String                       @db.Uuid
+  createdAt DateTime                     @default(now())
+  updatedAt DateTime                     @updatedAt
 
   user  User                     @relation(fields: [userId], references: [id])
   steps UserAuthenticationStep[]

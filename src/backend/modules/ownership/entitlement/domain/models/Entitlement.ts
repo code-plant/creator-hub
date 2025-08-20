@@ -22,7 +22,7 @@ export class Entitlement extends Entity<EntitlementId> {
     }
   }
 
-  public static reconstitute(
+  static reconstitute(
     id: string,
     holderId: string,
     itemId: string,
